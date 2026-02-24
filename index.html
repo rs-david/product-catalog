@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Productos</title>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .tag-input-container {
+            min-height: 42px;
+        }
+
+        .tag {
+            animation: fadeIn 0.2s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .custom-file-input {
+            background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='8' ry='8' stroke='%23CBD5E1FF' stroke-width='2' stroke-dasharray='6%2c 14' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+        }
+
+        .custom-file-input:hover {
+            background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='8' ry='8' stroke='%2394A3B8FF' stroke-width='2' stroke-dasharray='6%2c 14' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-40 mb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center gap-8">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="store" class="w-8 h-8 text-indigo-600"></i>
+                        <span class="text-xl font-bold text-slate-900">POS App</span>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-4">
+                        <a href="index.html"
+                            class="text-indigo-600 bg-indigo-50 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            Nuevo Producto
+                        </a>
+                        <a href="catalogo.html"
+                            class="text-slate-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            Catálogo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        <!-- Header -->
+        <div class="mb-8 text-center sm:text-left sm:flex sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 flex items-center justify-center sm:justify-start gap-3">
+                    <i data-lucide="package-plus" class="w-8 h-8 text-indigo-600"></i>
+                    <span id="pageTitle">Nuevo Producto</span>
+                </h1>
+                <p class="mt-2 text-slate-600" id="pageSubtitle">
+                    Completa la información del producto para agregarlo al inventario
+                </p>
+            </div>
+            <div class="mt-4 sm:mt-0">
+                <button type="button" onclick="window.location.reload()"
+                    class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i>
+                    Limpiar
+                </button>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form id="productForm" class="space-y-6">
+
+            <!-- Información Básica -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex items-center gap-2">
+                    <i data-lucide="info" class="w-5 h-5 text-indigo-600"></i>
+                    <h2 class="text-lg font-semibold text-slate-900">Información Básica</h2>
+                </div>
+
+                <div class="p-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <!-- Nombre -->
+                    <div class="sm:col-span-1">
+                        <label for="nombre" class="block text-sm font-medium text-slate-700 mb-1">
+                            Nombre del Producto <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="tag" class="h-5 w-5 text-slate-400"></i>
+                            </div>
+                            <input type="text" id="nombre" name="nombre" required
+                                class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm"
+                                placeholder="Ej: Collar de Plata">
+                        </div>
+                    </div>
+
+                    <!-- Categoría -->
+                    <div class="sm:col-span-1">
+                        <label for="categoria" class="block text-sm font-medium text-slate-700 mb-1">
+                            Categoría <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="grid-3x3" class="h-5 w-5 text-slate-400"></i>
+                            </div>
+                            <select id="categoria" name="categoria" required
+                                class="block w-full pl-10 pr-10 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm appearance-none bg-white">
+                                <option value="">Seleccionar categoría</option>
+                                <option value="joyeria">Joyería</option>
+                                <option value="accesorios">Accesorios</option>
+                                <option value="juguetes">Juguetes</option>
+                                <option value="regalos">Regalos</option>
+                                <option value="ropa">Ropa</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <i data-lucide="chevron-down" class="h-4 w-4 text-slate-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="sm:col-span-2">
+                        <label for="descripcion" class="block text-sm font-medium text-slate-700 mb-1">
+                            Descripción
+                        </label>
+                        <textarea id="descripcion" name="descripcion" rows="3"
+                            class="block w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm resize-none"
+                            placeholder="Describe las características del producto..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Precios y Costos -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex items-center gap-2">
+                    <i data-lucide="dollar-sign" class="w-5 h-5 text-emerald-600"></i>
+                    <h2 class="text-lg font-semibold text-slate-900">Precios y Costos</h2>
+                </div>
+
+                <div class="p-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <!-- Costo -->
+                    <div>
+                        <label for="costo" class="block text-sm font-medium text-slate-700 mb-1">
+                            Costo de Compra <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-slate-500 font-medium">$</span>
+                            </div>
+                            <input type="number" id="costo" name="costo" required min="0" step="0.01"
+                                class="block w-full pl-8 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm"
+                                placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <!-- Precio de Venta -->
+                    <div>
+                        <label for="precio" class="block text-sm font-medium text-slate-700 mb-1">
+                            Precio de Venta <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-slate-500 font-medium">$</span>
+                            </div>
+                            <input type="number" id="precio" name="precio" required min="0" step="0.01"
+                                class="block w-full pl-8 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm"
+                                placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <!-- Margen de Ganancia (Calculado) -->
+                    <div class="sm:col-span-3 bg-slate-50 rounded-lg p-4 border border-slate-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="trending-up" class="w-5 h-5 text-emerald-600"></i>
+                                <span class="text-sm font-medium text-slate-700">Margen de Ganancia:</span>
+                            </div>
+                            <div class="text-right">
+                                <span id="margenPorcentaje" class="text-lg font-bold text-emerald-600">0%</span>
+                                <span class="text-slate-400 mx-2">|</span>
+                                <span id="margenCantidad" class="text-sm font-medium text-slate-600">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventario -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex items-center gap-2">
+                    <i data-lucide="package" class="w-5 h-5 text-blue-600"></i>
+                    <h2 class="text-lg font-semibold text-slate-900">Inventario</h2>
+                </div>
+
+                <div class="p-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <!-- Stock -->
+                    <div>
+                        <label for="stock" class="block text-sm font-medium text-slate-700 mb-1">
+                            Stock Inicial <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="layers" class="h-5 w-5 text-slate-400"></i>
+                            </div>
+                            <input type="number" id="stock" name="stock" required min="0" step="1"
+                                class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm"
+                                placeholder="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Organización -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex items-center gap-2">
+                    <i data-lucide="folder" class="w-5 h-5 text-purple-600"></i>
+                    <h2 class="text-lg font-semibold text-slate-900">Organización</h2>
+                </div>
+
+                <div class="p-6">
+                    <!-- Etiquetas -->
+                    <label class="block text-sm font-medium text-slate-700 mb-2">
+                        Etiquetas / Tags
+                    </label>
+                    <div
+                        class="tag-input-container flex flex-wrap items-center gap-2 p-2 border border-slate-300 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-colors bg-white">
+                        <div id="tagsContainer" class="flex flex-wrap gap-2">
+                            <!-- Tags se agregarán aquí dinámicamente -->
+                        </div>
+                        <input type="text" id="tagInput" list="tagsSugerencias"
+                            class="flex-1 min-w-[120px] outline-none text-sm py-1 px-2"
+                            placeholder="Escribe y presiona Enter...">
+                    </div>
+                    <datalist id="tagsSugerencias">
+                        <option value="antiestrés"></option>
+                        <option value="mujer"></option>
+                        <option value="hombre"></option>
+                        <option value="collar"></option>
+                        <option value="anillo"></option>
+                        <option value="aretes"></option>
+                        <option value="pulsera"></option>
+                        <option value="magnético"></option>
+                        <option value="oro"></option>
+                        <option value="plata"></option>
+                        <option value="unisex"></option>
+                    </datalist>
+                    <p class="mt-1 text-xs text-slate-500">Presiona Enter para agregar. Usa las sugerencias o crea
+                        nuevas etiquetas.</p>
+                    <input type="hidden" id="etiquetas" name="etiquetas">
+                </div>
+            </div>
+
+            <!-- Imagen -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex items-center gap-2">
+                    <i data-lucide="image" class="w-5 h-5 text-pink-600"></i>
+                    <h2 class="text-lg font-semibold text-slate-900">Imagen del Producto</h2>
+                </div>
+
+                <div class="p-6">
+                    <div class="flex items-center justify-center w-full">
+                        <label for="imagen"
+                            class="custom-file-input flex flex-col items-center justify-center w-full h-64 border-2 border-slate-300 border-dashed rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors relative overflow-hidden">
+
+                            <!-- Preview Container -->
+                            <div id="imagePreview" class="hidden absolute inset-0 w-full h-full">
+                                <img src="" alt="Preview" class="w-full h-full object-cover">
+                                <div
+                                    class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                    <span class="text-white font-medium flex items-center gap-2">
+                                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                                        Cambiar imagen
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Upload Placeholder -->
+                            <div id="uploadPlaceholder" class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mb-3">
+                                    <i data-lucide="upload-cloud" class="w-6 h-6 text-indigo-600"></i>
+                                </div>
+                                <p class="mb-2 text-sm text-slate-700 font-medium">
+                                    <span class="text-indigo-600">Click para subir</span> o arrastra una imagen
+                                </p>
+                                <p class="text-xs text-slate-500">SVG, PNG, JPG o GIF (max. 2MB)</p>
+                            </div>
+                            <input id="imagen" name="imagen" type="file" class="hidden" accept="image/*" />
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                <button type="submit" id="btnSubmit"
+                    class="flex-1 sm:flex-none sm:px-8 bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                    <i data-lucide="save" class="w-5 h-5"></i>
+                    <span id="btnSubmitText">Guardar Producto</span>
+                </button>
+
+                <button type="button" onclick="cancelarEdicion();"
+                    class="flex-1 sm:flex-none sm:px-6 bg-white text-slate-700 border border-slate-300 py-3 px-4 rounded-lg font-medium hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors flex items-center justify-center gap-2">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                    Cancelar
+                </button>
+
+                <button type="button" onclick="eliminarProducto();"
+                    class="delete-product hidden flex-1 sm:flex-none sm:px-6 bg-red-500 text-white border border-red-300 py-3 px-4 rounded-lg font-medium hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center gap-2">
+                    <i data-lucide="trash" class="w-5 h-5"></i>
+                    Eliminar Producto
+                </button>
+            </div>
+
+        </form>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-4 right-4 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+            <div class="bg-slate-800 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3">
+                <i data-lucide="check-circle" class="icon w-5 h-5 text-emerald-400"></i>
+                <span id="toastMessage" class="font-medium">Producto guardado exitosamente</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="formulario.js"></script>
+</body>
+
+</html>

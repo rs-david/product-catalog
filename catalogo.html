@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Productos - POS</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .product-card {
+            transition: all 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.15);
+        }
+        .stock-badge {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .7; }
+        }
+        .filter-chip {
+            animation: slideIn 0.2s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center gap-8">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="store" class="w-8 h-8 text-indigo-600"></i>
+                        <span class="text-xl font-bold text-slate-900">POS System</span>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-4">
+                        <a href="index.html" class="text-slate-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            Nuevo Producto
+                        </a>
+                        <a href="catalogo.html" class="text-indigo-600 bg-indigo-50 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            Catálogo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Header -->
+        <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                    <i data-lucide="layout-grid" class="w-8 h-8 text-indigo-600"></i>
+                    Catálogo de Productos
+                </h1>
+                <p class="mt-2 text-slate-600" id="totalProductosText">Cargando productos...</p>
+            </div>
+            <a href="index.html" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow-sm">
+                <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+                Nuevo Producto
+            </a>
+        </div>
+
+        <!-- Filters & Search -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm mb-6">
+            <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-2 text-slate-700 font-medium">
+                    <i data-lucide="filter" class="w-5 h-5"></i>
+                    Filtros y Búsqueda
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="limpiarFiltros()" class="text-sm text-slate-500 hover:text-slate-700 underline">
+                        Limpiar filtros
+                    </button>
+                </div>
+            </div>
+            
+            <form id="buscar-productos" class="p-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                <!-- Búsqueda por Nombre -->
+                <div class="relative col-span-2 md:col-span-1 lg:col-span-3">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="search" class="h-5 w-5 text-slate-400"></i>
+                    </div>
+                    <input type="text" id="searchNombre" placeholder="Buscar por nombre..."
+                        class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                </div>
+
+                <!-- Filtro Categoría -->
+                <div class="relative col-span-2 md:col-span-1 lg:col-span-2">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="grid-3x3" class="h-5 w-5 text-slate-400"></i>
+                    </div>
+                    <select id="filterCategoria" onchange="filtrarProductos()"
+                        class="block w-full pl-10 pr-10 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm appearance-none bg-white">
+                        <option value="">Todas las categorías</option>
+                        <option value="joyeria">Joyería</option>
+                        <option value="accesorios">Accesorios</option>
+                        <option value="juguetes">Juguetes</option>
+                        <option value="regalos">Regalos</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <i data-lucide="chevron-down" class="h-4 w-4 text-slate-400"></i>
+                    </div>
+                </div>
+
+                <!-- Filtro Modelo -->
+                <div class="relative col-span-2 md:col-span-1 lg:col-span-2">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="box" class="h-5 w-5 text-slate-400"></i>
+                    </div>
+                    <input type="text" id="searchModelo" placeholder="Buscar por modelo..."
+                        class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                </div>
+
+                <div class="col-span-2 md:col-span-1 lg:col-span-1">
+                    <button type="submit" class="w-full inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow-sm">
+                        <i data-lucide="search" class="w-5 h-5 mr-2"></i>
+                        Buscar
+                    </button>
+                </div>
+
+            </form>
+
+            <!-- Filtros Adicionales -->
+            <div class="px-4 pb-4 flex flex-wrap items-center gap-3">
+                <!-- Filtro por Etiquetas -->
+                <div class="bg-white flex flex-row items-center gap-3 w-full md:w-auto">
+                    <h3 class="text-sm font-semibold text-gray-700">Etiquetas:</h3>
+                    <div id="contenedor-chips" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Ordenar Por -->
+                <div class="ml-auto flex items-center gap-2">
+                    <span class="text-sm text-slate-500">Ordenar por:</span>
+                    <select id="sortBy" onchange="filtrarProductos()" class="text-sm border border-slate-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="created_at-desc">Creado: Primero los nuevos</option>
+                        <option value="created_at-asc">Creado: Primero los antiguos</option>
+                        <option value="precio-asc">Precio: Menor a Mayor</option>
+                        <option value="precio-desc">Precio: Mayor a Menor</option>
+                        <option value="stock-asc">Stock: Menor a Mayor</option>
+                        <option value="stock-desc">Stock: Mayor a Menor</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div id="productosContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Los productos se cargarán aquí dinámicamente -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16">
+            <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="package-x" class="w-12 h-12 text-slate-400"></i>
+            </div>
+            <h3 class="text-lg font-medium text-slate-900 mb-2">No se encontraron productos</h3>
+            <p class="text-slate-500">Intenta ajustar los filtros o agrega nuevos productos</p>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-8 flex items-center justify-between border-t border-slate-200 pt-4">
+            <div class="text-sm text-slate-500">
+                Mostrando <span id="showingStart" class="font-medium">0</span> - <span id="showingEnd" class="font-medium">0</span> de <span id="showingTotal" class="font-medium">0</span> productos
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="cambiarPagina(-1)" id="btnPrev" class="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                </button>
+                <div id="paginationNumbers" class="flex items-center gap-1">
+                    <!-- Números de página -->
+                </div>
+                <button onclick="cambiarPagina(1)" id="btnNext" class="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal (Legacy - ya no se usa pero se mantiene oculto por compatibilidad) -->
+    <div id="editModal" class="hidden"></div>
+
+    <!-- Stock Adjustment Modal -->
+    <div id="stockModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                    <i data-lucide="package" class="w-5 h-5 text-indigo-600"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-900">Ajustar Stock</h3>
+                    <p class="text-sm text-slate-500" id="stockProductName"></p>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-slate-700 mb-2">Cantidad a <span id="stockActionType">añadir</span></label>
+                <div class="flex items-center gap-3">
+                    <button onclick="adjustStockInput(-1)" class="w-10 h-10 rounded-lg border border-slate-300 flex items-center justify-center hover:bg-slate-50">
+                        <i data-lucide="minus" class="w-4 h-4"></i>
+                    </button>
+                    <input type="number" id="stockAdjustAmount" value="1" min="1" class="flex-1 text-center px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-lg font-semibold">
+                    <button onclick="adjustStockInput(1)" class="w-10 h-10 rounded-lg border border-slate-300 flex items-center justify-center hover:bg-slate-50">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <p class="mt-2 text-sm text-slate-500">Stock actual: <span id="currentStock" class="font-medium text-slate-900"></span></p>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="confirmarAjusteStock()" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                    Confirmar
+                </button>
+                <button onclick="cerrarStockModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="catalogo.js"></script>
+</body>
+</html>
