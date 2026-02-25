@@ -140,7 +140,7 @@ function renderizarProductos(productos) {
                             ${etiquetas.length > 3 ? `<span class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">+${etiquetas.length - 3}</span>` : ''}
                         </div>
 
-                        <div class="grid grid-cols-3 gap-2">
+                        <div class="grid grid-cols-3 gap-2 h-12">
                             <button onclick="abrirEditModal(${id})" class="flex items-center justify-center px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors" title="Editar">
                                 <i data-lucide="pencil" class="w-4 h-4"></i>
                             </button>
