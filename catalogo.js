@@ -318,6 +318,7 @@ async function confirmarAjusteStock() {
             const stockSpan = card.querySelector('.stock');
             stockSpan.textContent = `${newStock} unidades`;
         }
+        productosMemory.find(p => Number(p.id) === Number(productoStockAjuste.id)).stock = newStock; // Actualizar en memoria
     } else {
         mostrarToast(`Error al actualizar stock: ${newStock.error}`, 'error');
     }
