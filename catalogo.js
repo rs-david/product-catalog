@@ -3,12 +3,12 @@ let productosMemory = [];
 let productosFiltrados = [];
 let estadoFiltro = 'todos';
 let paginaActual = 1;
-const productosPorPagina = 8;
+const productosPorPagina = 12;
 let vistaActual = 'grid'; // 'grid' o 'list'
 let productoEnEdicion = null;
 let productoStockAjuste = null;
 let tipoAjuste = 'add'; // 'add' o 'remove'
-const etiquetasDisponibles = ['collar', 'anillo', 'pulsera', 'aretes', 'mujer', 'hombre', 'antiestrés', 'unisex', 'magnético'];
+const etiquetasDisponibles = ['collar', 'anillo', 'pulsera', 'aretes', 'mujer', 'hombre', 'antiestrés'];
 const etiquetasSeleccionadas = new Set();
 
 async function obtenerProductos() {
@@ -89,9 +89,9 @@ async function filtrarProductos() {
 
     const productos = await response.json();
     productosMemory = productos;
-    paginaActual = 1;
+    // paginaActual = 1;
     renderizarProductos(productos);
-    actualizarPaginacion();
+    // actualizarPaginacion();
     actualizarTextoTotal(productos);
 }
 
@@ -225,20 +225,19 @@ function limpiarFiltros() {
     filtrarProductos();
 }
 
+const ss = {
+  save: (key, val) => sessionStorage.setItem(key, JSON.stringify(val)),
+  get: (key) => JSON.parse(sessionStorage.getItem(key)),
+  delete: (key) => sessionStorage.removeItem(key)
+};
+
 // Redirección a formulario de edición completo
 function abrirEditModal(id) {
     // Guardar en localStorage temporalmente para persistencia entre páginas
-    const producto = productosMemory.find(p => p.id === id);
+    const producto = productosMemory.find(p => Number(p.id) === Number(id));
     if (producto) {
-        // Asegurarnos de que exista el array en localStorage para el modo edición
-        let productosGuardados = JSON.parse(localStorage.getItem('productos') || '[]');
-        const existente = productosGuardados.find(p => p.id == id);
-        if (!existente) {
-            productosGuardados.push(producto);
-            localStorage.setItem('productos', JSON.stringify(productosGuardados));
-        }
+        ss.save('productoEnEdicion', producto);
     }
-
     // Redirigir al formulario con parámetro de edición
     window.location.href = `index.html?edit=${id}`;
 }

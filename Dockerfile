@@ -1,15 +1,19 @@
-# Usamos una imagen oficial de PHP con Apache
 FROM php:8.2-apache
 
-# Instalamos las extensiones necesarias para PostgreSQL
-RUN apt-get update && apt-get install -y libpq-dev \
+# 1. Dependencias del sistema
+RUN apt-get update && apt-get install -y libpq-dev unzip \
     && docker-php-ext-install pdo pdo_pgsql
 
-# Copiamos los archivos de tu proyecto al servidor web
-COPY . /var/www/html/
+# 2. TRAER COMPOSER (Forma elegante)
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
-# Le decimos a Apache que escuche en el puerto que Render asigne
+# 3. Código y dependencias
+WORKDIR /var/www/html
+COPY . .
+RUN composer install --no-dev --optimize-autoloader
+
+# 4. Puertos y permisos
 RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
+RUN chown -R www-data:www-data /var/www/html
 
-# Exponemos el puerto
 EXPOSE ${PORT}

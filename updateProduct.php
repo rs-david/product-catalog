@@ -1,5 +1,6 @@
 <?php
 require 'config.php';
+require 'generarPrefijoDeModelo.php';
 header('Content-Type: application/json');
 
 $input = file_get_contents('php://input');
@@ -15,11 +16,14 @@ try {
     // 1. Preparar el array de etiquetas para Postgres text[]
     $etiquetasPostgres = '{' . implode(',', array_map('trim', $data['etiquetas'])) . '}';
 
+    $prefijo = generarPrefijoDeModelo($data['categoria']);
+
     // 2. Sentencia SQL
     $sql = "UPDATE productos SET 
                 nombre = :nombre,
                 descripcion = :descripcion,
                 categoria = :categoria,
+                prefijo = :prefijo,
                 costo = :costo,
                 precio = :precio,
                 stock = :stock,
@@ -34,6 +38,7 @@ try {
         ':nombre'      => $data['nombre'],
         ':descripcion' => $data['descripcion'],
         ':categoria'   => $data['categoria'],
+        ':prefijo'     => $prefijo,
         ':costo'       => $data['costo'],
         ':precio'      => $data['precio'],
         ':stock'       => $data['stock'],

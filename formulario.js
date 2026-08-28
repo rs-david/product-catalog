@@ -1,5 +1,14 @@
-// Initialize Lucide icons
+// Initialize Lucide Icons
 lucide.createIcons();
+
+const defaultImage = 'https://res.cloudinary.com/ddpbhed0r/image/upload/f_auto,q_auto/v1772048916/WhatsApp_Image_2025-08-20_at_12.57.43_PM_jfp2zw.jpg';
+
+// Session Storage Utility
+const ss = {
+  save: (key, val) => sessionStorage.setItem(key, JSON.stringify(val)),
+  get: (key) => JSON.parse(sessionStorage.getItem(key)),
+  delete: (key) => sessionStorage.removeItem(key)
+};
 
 // Tags Management
 const tagInput = document.getElementById('tagInput');
@@ -126,7 +135,6 @@ precioInput.addEventListener('input', calcularMargen);
 // Modo edición
 let editMode = false;
 let editProductId = null;
-let currentProduct = [];
 
 // Verificar si venimos en modo edición desde el catálogo
 const deleteBtn = document.querySelector('.delete-product');
@@ -135,14 +143,10 @@ window.addEventListener('load', function () {
     const editId = urlParams.get('edit');
 
     if (editId) {
-        // Simular carga de producto (en producción vendría de la API/localStorage)
-        const productos = JSON.parse(localStorage.getItem('productos') || '[]');
-        const producto = productos.find(p => p.id == editId);
-
+        const producto = ss.get('productoEnEdicion');
         if (producto) {
             editMode = true;
             editProductId = editId;
-            currentProduct = producto;
             deleteBtn.classList.remove('hidden');
             cargarProductoEnFormulario(producto);
         }
@@ -186,6 +190,13 @@ const productForm = document.getElementById('productForm');
 productForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    // Deshabilitar botones y mostrar estado de guardado
+    const actionButtons = productForm.querySelectorAll('.action-buttons button');
+    const submitBtn = productForm.querySelector('button[type="submit"]');
+    const submitBtnText = submitBtn.querySelector('.text');
+    actionButtons.forEach(btn => btn.disabled = true);
+    submitBtnText.innerText = "Guardando...";
+
     const formData = new FormData(productForm);
     formData.delete('imagen'); // eliminar campo imagen del formData ya que se maneja aparte
     const data = Object.fromEntries(formData.entries());
@@ -194,45 +205,65 @@ productForm.addEventListener('submit', async (e) => {
     if (editMode) {
         data.id = editProductId;
 
+        // Si se subió una nueva imagen, subirla a Cloudinary y obtener la URL.
         if (imagenInput.files.length > 0) {
             const imageUrl = await saveImageToCloudinary(imagenInput.files[0]);
             if (imageUrl.error) return showToast(imageUrl.error, 'error');
             data.url = imageUrl;
         } else {
-            data.url = currentProduct.url; // mantener imagen actual si no se sube una nueva
+            data.url = ss.get('productoEnEdicion').url || defaultImage;
         }
 
+        // Enviar datos al backend para actualizar el producto
+        const update = await updateProduct(data);
+        if (update.error) return showToast(update.error, 'error');
+
+        showToast('Producto actualizado exitosamente');
+
+        // Redirigir al catálogo después de un momento
+        setTimeout(() => {
+            window.location.href = 'catalogo.html';
+        }, 1500);
+
+    } else {
+        // Nuevo producto: subir imagen a Cloudinary si se seleccionó una, sino usar imagen por defecto
+        if (imagenInput.files.length > 0) {
+            const imageUrl = await saveImageToCloudinary(imagenInput.files[0]);
+            if (imageUrl.error) return showToast(imageUrl.error, 'error');
+            data.url = imageUrl;
+        } else {
+            data.url = defaultImage;
+        }
+
+        const saved = await guardarProducto(data);
+        if (saved.error) return showToast(saved.error, 'error');
+
+        showToast('Producto guardado exitosamente');
+
+        setTimeout(() => {
+            window.location.href = window.location.pathname;
+        }, 1500);
+    }
+
+});
+
+async function updateProduct(data) {
+    try {
         const response = await fetch('updateProduct.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
 
-        const resultado = await response.json();
+        const result = await response.json();
 
-        if (resultado.status === 'success') {
-            showToast('Producto actualizado con éxito');
-        } else {
-            showToast('Error: ' + resultado.mensaje);
-        }
-
-        // Redirigir al catálogo después de un momento
-        setTimeout(() => {
-            window.location.href = 'catalogo.html';
-        }, 1500);
-    } else {
-        const imageUrl = await saveImageToCloudinary(imagenInput.files[0]);
-        if (imageUrl.error) return showToast(imageUrl.error, 'error');
-        data.url = imageUrl;
-
-        const resultado = await guardarProducto(data);
-        if (resultado.error) return showToast(resultado.error, 'error');
-
-        showToast('Producto guardado exitosamente');
-        productForm.reset();
-        resetForm();
+        if (result.status !== 'success') throw new Error('Error al actualizar el producto');
+    
+        return result;
+    } catch (error) {
+        return { error: error.message };
     }
-});
+}
 
 async function saveImageToCloudinary(file) {
     try {
@@ -266,11 +297,15 @@ async function guardarProducto(data) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-        return await response.json();
+
+        const result = await response.json();
+
+        if (result.status !== 'success') throw new Error('Error al guardar el producto');
+
+        return result;
     } catch (error) {
         return { error: error.message };
     }
-
 }
 
 async function eliminarProducto() {
@@ -312,6 +347,10 @@ function resetForm() {
     imagePreview.classList.add('hidden');
     uploadPlaceholder.classList.remove('hidden');
     previewImg.src = '';
+    pageTitle.textContent = 'Nuevo Producto';
+    pageSubtitle.textContent = `Completa la información del producto para agregarlo al inventario`;
+    btnSubmit.textContent = 'Guardar Producto';
+    deleteBtn.classList.add('hidden');
     calcularMargen();
 }
 
@@ -338,45 +377,4 @@ function showToast(message, type = 'success') {
     setTimeout(() => {
         toast.classList.add('translate-y-20', 'opacity-0');
     }, 3500);
-}
-
-// Drag and drop para imagen
-const dropZone = document.querySelector('.custom-file-input');
-
-['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-    dropZone.addEventListener(eventName, preventDefaults, false);
-});
-
-function preventDefaults(e) {
-    e.preventDefault();
-    e.stopPropagation();
-}
-
-['dragenter', 'dragover'].forEach(eventName => {
-    dropZone.addEventListener(eventName, highlight, false);
-});
-
-['dragleave', 'drop'].forEach(eventName => {
-    dropZone.addEventListener(eventName, unhighlight, false);
-});
-
-function highlight(e) {
-    dropZone.classList.add('bg-indigo-50', 'border-indigo-400');
-}
-
-function unhighlight(e) {
-    dropZone.classList.remove('bg-indigo-50', 'border-indigo-400');
-}
-
-dropZone.addEventListener('drop', handleDrop, false);
-
-function handleDrop(e) {
-    const dt = e.dataTransfer;
-    const files = dt.files;
-
-    if (files.length > 0) {
-        imagenInput.files = files;
-        const event = new Event('change');
-        imagenInput.dispatchEvent(event);
-    }
 }
